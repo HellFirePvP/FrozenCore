@@ -46,7 +46,7 @@ public class TileCentrifuge extends TileEntitySynchronized implements IEnergyCon
 
     @Override
     public void update() {
-
+        System.out.println("v");
     }
 
     @Override

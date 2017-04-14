@@ -67,10 +67,15 @@ public class IOInventory implements IItemHandlerModifiable {
         return this;
     }
 
+    public TileEntitySynchronized getOwner() {
+        return owner;
+    }
+
     @Override
     public void setStackInSlot(int slot, ItemStack stack) {
         if(this.inventory.containsKey(slot)) {
             this.inventory.get(slot).itemStack = (stack == null ? null : stack.copy());
+            getOwner().markForUpdate();
         }
     }
 
@@ -98,12 +103,14 @@ public class IOInventory implements IItemHandlerModifiable {
             }
             return copyWithClampedStackSize(toInsert, toInsert.stackSize - inserted.stackSize);
         } else {
-            if(ItemStack.areItemStacksEqual(holder.itemStack, toInsert) && ItemStack.areItemStackTagsEqual(holder.itemStack, toInsert)) {
+            ItemStack matcherStack = copyWithClampedStackSize(toInsert, holder.itemStack.stackSize);
+            if(ItemStack.areItemStacksEqual(holder.itemStack, matcherStack) && ItemStack.areItemStackTagsEqual(holder.itemStack, matcherStack)) {
                 int remaining = 64 - holder.itemStack.stackSize;
                 int toInsertAmt = MathHelper.clamp_int(toInsert.stackSize, 0, remaining);
                 if(!simulate) {
-                    holder.itemStack = copyWithClampedStackSize(holder.itemStack, holder.itemStack.stackSize + toInsertAmt);
+                    holder.itemStack.stackSize += toInsertAmt;
                 }
+                getOwner().markForUpdate();
                 return copyWithClampedStackSize(toInsert, toInsert.stackSize - toInsertAmt);
             }
         }
@@ -121,6 +128,7 @@ public class IOInventory implements IItemHandlerModifiable {
         if(!simulate) {
             holder.itemStack = copyWithClampedStackSize(holder.itemStack, holder.itemStack.stackSize - extract.stackSize);
         }
+        getOwner().markForUpdate();
         return extract;
     }
 
