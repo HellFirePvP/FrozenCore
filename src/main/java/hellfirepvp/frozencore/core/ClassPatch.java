@@ -46,7 +46,7 @@ public abstract class ClassPatch {
                 return m;
             }
         }
-        FMLLog.info("[AstralTransformer] Find method will fail. Printing all methods as debug...");
+        FMLLog.info("[FrozenTransformer] Find method will fail. Printing all methods as debug...");
         for (MethodNode found : cn.methods) {
             FMLLog.info("Method: mame=" + found.name + ", desc=" + found.desc + ", signature=" + found.signature);
         }
@@ -60,7 +60,7 @@ public abstract class ClassPatch {
                 return m;
             }
         }
-        FMLLog.info("[AstralTransformer] Find method will fail. Printing all methods as debug...");
+        FMLLog.info("[FrozenTransformer] Find method will fail. Printing all methods as debug...");
         for (MethodNode found : cn.methods) {
             FMLLog.info("Method: mame=" + found.name + ", desc=" + found.desc + ", signature=" + found.signature);
         }

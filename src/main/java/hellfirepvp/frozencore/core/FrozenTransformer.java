@@ -31,9 +31,9 @@ public class FrozenTransformer implements IClassTransformer {
     private Map<String, List<ClassPatch>> availablePatches = new HashMap<>();
 
     public FrozenTransformer() throws IOException {
-        FMLLog.info("[AstralTransformer] Loading patches...");
+        FMLLog.info("[FrozenTransformer] Loading patches...");
         int loaded = loadClassPatches();
-        FMLLog.info("[AstralTransformer] Initialized! Loaded " + loaded + " class patches!");
+        FMLLog.info("[FrozenTransformer] Initialized! Loaded " + loaded + " class patches!");
     }
 
     private int loadClassPatches() throws IOException {
@@ -73,12 +73,12 @@ public class FrozenTransformer implements IClassTransformer {
             if(!availablePatches.isEmpty()) {
                 List<ClassPatch> patches = availablePatches.get(transformedName);
                 if(patches != null && !patches.isEmpty()) {
-                    FMLLog.info("[AstralTransformer] Transforming " + name + " : " + transformedName + " with " + patches.size() + " patches!");
+                    FMLLog.info("[FrozenTransformer] Transforming " + name + " : " + transformedName + " with " + patches.size() + " patches!");
                     try {
                         for (ClassPatch patch : patches) {
                             currentPatch = patch;
                             patch.transform(node);
-                            FMLLog.info("[AstralTransformer] Applied patch " + patch.getClass().getSimpleName().toUpperCase());
+                            FMLLog.info("[FrozenTransformer] Applied patch " + patch.getClass().getSimpleName().toUpperCase());
                             currentPatch = null;
                         }
                     } catch (Exception exc) {
