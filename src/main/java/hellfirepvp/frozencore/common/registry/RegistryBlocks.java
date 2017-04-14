@@ -1,8 +1,10 @@
 package hellfirepvp.frozencore.common.registry;
 
 import hellfirepvp.frozencore.FrozenCore;
+import hellfirepvp.frozencore.common.block.BlockCentrifuge;
 import hellfirepvp.frozencore.common.block.BlockDynamicColor;
 import hellfirepvp.frozencore.common.block.BlockVariants;
+import hellfirepvp.frozencore.common.tile.TileCentrifuge;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.ItemMeshDefinition;
@@ -10,6 +12,7 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.block.statemap.StateMapperBase;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
@@ -24,6 +27,8 @@ import java.util.List;
  * Date: 14.04.2017 / 16:49
  */
 public class RegistryBlocks {
+
+    public static BlockCentrifuge blockCentrifuge;
 
     public static List<Block> defaultItemBlocksToRegister = new LinkedList<>();
     public static List<Block> customNameItemBlocksToRegister = new LinkedList<>();
@@ -43,7 +48,8 @@ public class RegistryBlocks {
 
     //Blocks
     private static void registerBlocks() {
-
+        blockCentrifuge = registerBlock(new BlockCentrifuge());
+        queueDefaultItemBlock(blockCentrifuge);
     }
 
     //Called after items are registered.
@@ -54,7 +60,15 @@ public class RegistryBlocks {
 
     //Tiles
     private static void registerTileEntities() {
+        registerTile(TileCentrifuge.class);
+    }
 
+    private static void queueCustomNameItemBlock(Block block) {
+        customNameItemBlocksToRegister.add(block);
+    }
+
+    private static void queueDefaultItemBlock(Block block) {
+        defaultItemBlocksToRegister.add(block);
     }
 
     private static <T extends Block> T registerBlock(T block, String name) {
@@ -81,6 +95,14 @@ public class RegistryBlocks {
             FrozenCore.proxy.registerVariantName(Item.getItemFromBlock(block), block.getUnlocalizedName());
             FrozenCore.proxy.registerBlockRender(block, 0, block.getUnlocalizedName());
         }
+    }
+
+    private static void registerTile(Class<? extends TileEntity> tile, String name) {
+        GameRegistry.registerTileEntity(tile, name);
+    }
+
+    private static void registerTile(Class<? extends TileEntity> tile) {
+        registerTile(tile, tile.getSimpleName().toLowerCase());
     }
 
     public static class FluidCustomModelMapper extends StateMapperBase implements ItemMeshDefinition {

@@ -1,5 +1,7 @@
 package hellfirepvp.frozencore.common;
 
+import hellfirepvp.frozencore.common.registry.RegistryBlocks;
+import hellfirepvp.frozencore.common.registry.RegistryItems;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 
@@ -13,7 +15,12 @@ import net.minecraft.item.Item;
 public class CommonProxy {
 
     public void preInit() {
+        RegistryItems.setupDefaults();
 
+        RegistryBlocks.init();
+        RegistryItems.init();
+
+        RegistryBlocks.initRenderRegistry();
     }
 
     public void init() {

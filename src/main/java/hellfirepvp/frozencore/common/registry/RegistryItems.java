@@ -5,8 +5,11 @@ import hellfirepvp.frozencore.common.item.ItemBlockCustomName;
 import hellfirepvp.frozencore.common.item.ItemDynamicColor;
 import hellfirepvp.frozencore.common.item.ItemVariants;
 import net.minecraft.block.Block;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.common.registry.IForgeRegistryEntry;
 
@@ -22,7 +25,18 @@ import java.util.List;
  */
 public class RegistryItems {
 
+    public static CreativeTabs creativeTabFrozenTweaks;
+
     public static List<ItemDynamicColor> pendingDynamicColorItems = new LinkedList<>();
+
+    public static void setupDefaults() {
+        creativeTabFrozenTweaks = new CreativeTabs(FrozenCore.MODID) {
+            @Override
+            public Item getTabIconItem() {
+                return Item.getItemFromBlock(Blocks.ICE);
+            }
+        };
+    }
 
     public static void init() {
         registerItems();
