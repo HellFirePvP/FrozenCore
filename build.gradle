@@ -29,6 +29,14 @@ minecraft {
     mappings = "snapshot_20161111"
 }
 
+//Don't forget to modify your JVM args: -Xmx4096M -Xms4096M -Dfml.coreMods.load=hellfirepvp.frozencore.core.FrozenLoadingPlugin
+jar {
+    manifest {
+        attributes 'FMLCorePlugin': 'hellfirepvp.frozencore.core.FrozenLoadingPlugin',
+            'FMLCorePluginContainsFMLMod': 'true'
+    }
+}
+
 processResources {
 
     inputs.property "version", project.version
