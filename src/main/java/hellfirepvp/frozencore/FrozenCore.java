@@ -3,7 +3,7 @@ package hellfirepvp.frozencore;
 import net.minecraftforge.fml.common.Mod;
 
 /**
- * This class is part of the Astral Sorcery Mod
+ * This class is part of the FrozenCore Core/Tweaker-mod
  * The complete source code for this mod can be found on github.
  * Class: FrozenCore
  * Created by HellFirePvP
