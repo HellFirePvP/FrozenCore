@@ -31,7 +31,7 @@ import java.util.List;
  */
 public class TileCentrifuge extends TileEntitySynchronized implements IEnergyReceiver, ITickable, UpdateListener {
 
-    private static final int MAX_ENERGY = 20000;
+    private static final int MAX_ENERGY = 50000;
     private static final int[] IN_SLOTS   = new int[] { 0, 1, 2 };
     private static final int[] OUT_SLOTS  = new int[] { 3, 4, 5, 6, 7, 8 };
     private static final int[] MISC_SLOTS = new int[] { 9 };
@@ -107,13 +107,15 @@ public class TileCentrifuge extends TileEntitySynchronized implements IEnergyRec
 
     private void recipeTick() {
         if(activeRecipe != null) {
-            float ovMul = getOverclockerMultiplier(this);
-            if(activeRecipe.matches(this, ovMul, activeCraftingTick) && hasSpaceInOutputSlots(activeRecipe)) {
-                activeCraftingTick--;
-                currentEnergy -= activeRecipe.getRfCostPerTick();
-                markForUpdate();
-                if(activeCraftingTick <= 0) {
-                    finishCrafting();
+            if(activeRecipe.matches(this) && hasSpaceInOutputSlots(activeRecipe)) {
+                float ovMul = getOverclockerMultiplier(this);
+                if(currentEnergy >= (activeRecipe.getRfCostPerTick() * ovMul)) {
+                    activeCraftingTick--;
+                    currentEnergy -= (activeRecipe.getRfCostPerTick() * ovMul);
+                    markForUpdate();
+                    if(activeCraftingTick <= 0) {
+                        finishCrafting();
+                    }
                 }
             } else {
                 this.activeRecipe = null;
@@ -226,8 +228,7 @@ public class TileCentrifuge extends TileEntitySynchronized implements IEnergyRec
         if(worldObj.isRemote) return;
 
         if(activeRecipe != null) {
-            float ovMul = getOverclockerMultiplier(this);
-            if(!activeRecipe.matches(this, ovMul, activeCraftingTick) || !hasSpaceInOutputSlots(activeRecipe)) {
+            if(!activeRecipe.matches(this) || !hasSpaceInOutputSlots(activeRecipe)) {
                 this.activeRecipe = null;
                 this.activeCraftingTick = -1;
                 this.maxRecipeTick = -1;

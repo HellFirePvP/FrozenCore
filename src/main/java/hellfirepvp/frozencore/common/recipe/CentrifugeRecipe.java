@@ -71,13 +71,6 @@ public class CentrifugeRecipe {
     }
 
     public boolean matches(TileCentrifuge centrifuge) {
-        return matches(centrifuge, TileCentrifuge.getOverclockerMultiplier(centrifuge), getCraftingTickTime());
-    }
-
-    public boolean matches(TileCentrifuge centrifuge, float powerMultiplier, int ticksLeft) {
-        int rfCost = ticksLeft * MathHelper.ceiling_float_int(rfCostPerTick * powerMultiplier);
-        if(centrifuge.getCurrentEnergy() < rfCost) return false;
-
         IOInventory inventory = centrifuge.getInventory();
         if(fluidRequired != null) {
             SimpleSingleFluidCapabilityTank tank = centrifuge.getTank();

@@ -17,9 +17,10 @@ public class RegistryRecipes {
 
     public static void init() {
 
-        CentrifugeRecipe recipe = CentrifugeRecipeRegistry.registerRecipe(new CentrifugeRecipe(10,
+        CentrifugeRecipe recipe = CentrifugeRecipeRegistry.registerRecipe(new CentrifugeRecipe(100,
                 new CentrifugeRecipe.CentrifugeOutput(0.2F, new ItemStack(Blocks.ICE)),
                 new CentrifugeRecipe.CentrifugeOutput(0.7F, new ItemStack(Blocks.SNOW))));
+        recipe.setCraftingTickTime(100);
         recipe.setRequiredFluid(FluidRegistry.WATER, 500);
 
     }

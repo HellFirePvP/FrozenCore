@@ -73,6 +73,11 @@ public class GuiContainerCentrifuge extends GuiContainer {
                     String.format("%d / %d RF", current, max)),
                     mouseX - guiLeft, mouseY - guiTop);
         }
+
+        if(owner.isCrafting() && rctProgressPaste.contains(mouseX - guiLeft, mouseY - guiTop)) {
+            float perc = owner.getCurrentCraftingProcess();
+            drawHoveringText(Lists.newArrayList(((int) (perc * 100)) + "%"), mouseX - guiLeft, mouseY - guiTop);
+        }
     }
 
     @Override
