@@ -2,12 +2,14 @@ package hellfirepvp.frozencore.client;
 
 import com.google.common.collect.Lists;
 import hellfirepvp.frozencore.FrozenCore;
+import hellfirepvp.frozencore.client.gui.GuiContainerCentrifuge;
 import hellfirepvp.frozencore.client.util.MeshRegisterHelper;
 import hellfirepvp.frozencore.common.CommonProxy;
 import hellfirepvp.frozencore.common.block.BlockDynamicColor;
 import hellfirepvp.frozencore.common.item.ItemDynamicColor;
 import hellfirepvp.frozencore.common.registry.RegistryBlocks;
 import hellfirepvp.frozencore.common.registry.RegistryItems;
+import hellfirepvp.frozencore.common.tile.TileCentrifuge;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemModelMesher;
@@ -16,10 +18,13 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -90,6 +95,19 @@ public class ClientProxy extends CommonProxy {
 
     private <T extends TileEntity> void registerTESR(Class<T> tile, TileEntitySpecialRenderer<T> renderer) {
         ClientRegistry.bindTileEntitySpecialRenderer(tile, renderer);
+    }
+
+    @Override
+    public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
+        switch (ID) {
+            case 0:
+                TileEntity te = world.getTileEntity(new BlockPos(x, y, z));
+                if(te != null && te instanceof TileCentrifuge) {
+                    return new GuiContainerCentrifuge((TileCentrifuge) te);
+                }
+                break;
+        }
+        return null;
     }
 
     public void registerDisplayInformationInit() {

@@ -21,11 +21,13 @@ import java.util.*;
  */
 public class IOInventory implements IItemHandlerModifiable {
 
+    public boolean allowAnySlots = false;
     private final TileEntitySynchronized owner;
 
     private Map<Integer, SlotStackHolder> inventory = new HashMap<>();
     private int[] inSlots = new int[0], outSlots = new int[0], miscSlots = new int[0];
 
+    private UpdateListener listener = null;
     public List<EnumFacing> accessibleSides = new ArrayList<>();
     private boolean acceptNullCapabilityAccess;
 
@@ -67,6 +69,11 @@ public class IOInventory implements IItemHandlerModifiable {
         return this;
     }
 
+    public IOInventory setListener(UpdateListener listener) {
+        this.listener = listener;
+        return this;
+    }
+
     public TileEntitySynchronized getOwner() {
         return owner;
     }
@@ -74,8 +81,11 @@ public class IOInventory implements IItemHandlerModifiable {
     @Override
     public void setStackInSlot(int slot, ItemStack stack) {
         if(this.inventory.containsKey(slot)) {
-            this.inventory.get(slot).itemStack = (stack == null ? null : stack.copy());
+            this.inventory.get(slot).itemStack = stack;
             getOwner().markForUpdate();
+            if(listener != null) {
+                listener.onChange();
+            }
         }
     }
 
@@ -91,52 +101,89 @@ public class IOInventory implements IItemHandlerModifiable {
 
     @Override
     public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-        if(stack == null || stack.getItem() == null) return null;
-        if (!arrayContains(inSlots, slot)) return null;
-        if (!this.inventory.containsKey(slot)) return null; //Shouldn't happen anymore here tho
+        if(stack == null || stack.getItem() == null) return stack;
+        if (!allowAnySlots) {
+            if (!arrayContains(inSlots, slot)) return stack;
+        }
+        if (!this.inventory.containsKey(slot)) return stack; //Shouldn't happen anymore here tho
+
         SlotStackHolder holder = this.inventory.get(slot);
-        ItemStack toInsert = copyWithClampedStackSize(stack, stack.stackSize);
-        if(holder.itemStack == null) {
-            ItemStack inserted = copyWithClampedStackSize(toInsert, Math.min(toInsert.stackSize, 64));
-            if(!simulate) {
-                holder.itemStack = copyWithClampedStackSize(inserted, inserted.stackSize);
+        ItemStack toInsert = copyWithSize(stack, stack.stackSize);
+        if(holder.itemStack != null) {
+            ItemStack existing = copyWithSize(holder.itemStack, holder.itemStack.stackSize);
+            int max = Math.min(existing.getMaxStackSize(), 64);
+            if (existing.stackSize >= max || !ItemUtils.canMergeItemStacks(existing, toInsert)) {
+                return stack;
             }
-            return copyWithClampedStackSize(toInsert, toInsert.stackSize - inserted.stackSize);
-        } else {
-            ItemStack matcherStack = copyWithClampedStackSize(toInsert, holder.itemStack.stackSize);
-            if(ItemStack.areItemStacksEqual(holder.itemStack, matcherStack) && ItemStack.areItemStackTagsEqual(holder.itemStack, matcherStack)) {
-                int remaining = 64 - holder.itemStack.stackSize;
-                int toInsertAmt = MathHelper.clamp_int(toInsert.stackSize, 0, remaining);
-                if(!simulate) {
-                    holder.itemStack.stackSize += toInsertAmt;
-                }
+            int movable = Math.min(max - existing.stackSize, stack.stackSize);
+            if (!simulate) {
+                holder.itemStack.stackSize += movable;
                 getOwner().markForUpdate();
-                return copyWithClampedStackSize(toInsert, toInsert.stackSize - toInsertAmt);
+                if(listener != null) {
+                    listener.onChange();
+                }
+            }
+            if (movable >= stack.stackSize) {
+                return null;
+            } else {
+                ItemStack copy = stack.copy();
+                copy.stackSize -= movable;
+                return copy;
+            }
+        } else {
+            int max = Math.min(stack.getMaxStackSize(), 64);
+            if (max >= stack.stackSize) {
+                if (!simulate) {
+                    holder.itemStack = stack.copy();
+                    getOwner().markForUpdate();
+                    if(listener != null) {
+                        listener.onChange();
+                    }
+                }
+                return null;
+            } else {
+                ItemStack copy = stack.copy();
+                copy.stackSize = max;
+                if (!simulate) {
+                    holder.itemStack = copy;
+                    getOwner().markForUpdate();
+                    if(listener != null) {
+                        listener.onChange();
+                    }
+                }
+                copy = stack.copy();
+                copy.stackSize -= max;
+                return copy;
             }
         }
-        return null;
     }
 
     @Override
     public ItemStack extractItem(int slot, int amount, boolean simulate) {
-        if (!arrayContains(outSlots, slot)) return null;
+        if (!allowAnySlots) {
+            if (!arrayContains(outSlots, slot)) return null;
+        }
         if (!this.inventory.containsKey(slot)) return null; //Shouldn't happen anymore here tho
         SlotStackHolder holder = this.inventory.get(slot);
         if(holder.itemStack == null) return null;
-        ItemStack extract = copyWithClampedStackSize(holder.itemStack, amount);
+
+        ItemStack extract = copyWithSize(holder.itemStack, Math.min(amount, holder.itemStack.stackSize));
         if(extract == null) return null;
         if(!simulate) {
-            holder.itemStack = copyWithClampedStackSize(holder.itemStack, holder.itemStack.stackSize - extract.stackSize);
+            holder.itemStack = copyWithSize(holder.itemStack, holder.itemStack.stackSize - extract.stackSize);
+            if(listener != null) {
+                listener.onChange();
+            }
         }
         getOwner().markForUpdate();
         return extract;
     }
 
     @Nullable
-    private ItemStack copyWithClampedStackSize(@Nullable ItemStack stack, int amount) {
+    private ItemStack copyWithSize(@Nullable ItemStack stack, int amount) {
         if (stack == null || stack.getItem() == null || amount <= 0) return null;
         ItemStack s = stack.copy();
-        s.stackSize = MathHelper.clamp_int(amount, 1, stack.stackSize);
+        s.stackSize = Math.min(amount, 64);
         return s;
     }
 
@@ -200,6 +247,10 @@ public class IOInventory implements IItemHandlerModifiable {
         int[] sides = tag.getIntArray("sides");
         for (int i : sides) {
             this.accessibleSides.add(EnumFacing.values()[i]);
+        }
+
+        if(listener != null) {
+            listener.onChange();
         }
     }
 

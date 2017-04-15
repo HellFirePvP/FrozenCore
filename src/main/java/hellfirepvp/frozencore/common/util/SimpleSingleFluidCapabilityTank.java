@@ -29,6 +29,7 @@ public class SimpleSingleFluidCapabilityTank implements IFluidTank, IFluidTankPr
 
     private boolean allowInput = true, allowOutput = true;
 
+    private UpdateListener listener = null;
     public List<EnumFacing> accessibleSides = new ArrayList<>();
     private boolean acceptNullCapabilityAccess;
 
@@ -65,11 +66,16 @@ public class SimpleSingleFluidCapabilityTank implements IFluidTank, IFluidTankPr
 
     //returns min(toAdd, what can be added at most)
     public int getMaxAddable(int toAdd) {
-        return Math.min(toAdd, maxCapacity - toAdd);
+        return Math.min(toAdd, maxCapacity - amount);
     }
 
     public int getMaxDrainable(int toDrain) {
         return Math.min(toDrain, amount);
+    }
+
+    public SimpleSingleFluidCapabilityTank setListener(UpdateListener listener) {
+        this.listener = listener;
+        return this;
     }
 
     public TileEntitySynchronized getOwner() {
@@ -82,6 +88,9 @@ public class SimpleSingleFluidCapabilityTank implements IFluidTank, IFluidTankPr
         int addable = getMaxAddable(amount);
         this.amount += addable;
         getOwner().markForUpdate();
+        if(listener != null) {
+            listener.onChange();
+        }
         return amount - addable;
     }
 
@@ -94,6 +103,9 @@ public class SimpleSingleFluidCapabilityTank implements IFluidTank, IFluidTankPr
             setFluid(null);
         }
         getOwner().markForUpdate();
+        if(listener != null) {
+            listener.onChange();
+        }
         return drainable;
     }
 
@@ -115,6 +127,9 @@ public class SimpleSingleFluidCapabilityTank implements IFluidTank, IFluidTankPr
         }
         this.fluid = fluid;
         getOwner().markForUpdate();
+        if(listener != null) {
+            listener.onChange();
+        }
     }
 
     @Override
@@ -173,6 +188,9 @@ public class SimpleSingleFluidCapabilityTank implements IFluidTank, IFluidTankPr
         int maxAdded = resource.amount;
         int addable = getMaxAddable(maxAdded);
         if(doFill) {
+            if(getTankFluid() == null) {
+                setFluid(resource.getFluid());
+            }
             addable = maxAdded - addAmount(addable);
         }
         return addable;
@@ -229,6 +247,10 @@ public class SimpleSingleFluidCapabilityTank implements IFluidTank, IFluidTankPr
         int[] sides = tag.getIntArray("sides");
         for (int i : sides) {
             this.accessibleSides.add(EnumFacing.values()[i]);
+        }
+
+        if(listener != null) {
+            listener.onChange();
         }
     }
 

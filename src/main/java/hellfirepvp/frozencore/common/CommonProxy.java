@@ -1,9 +1,19 @@
 package hellfirepvp.frozencore.common;
 
+import hellfirepvp.frozencore.FrozenCore;
+import hellfirepvp.frozencore.common.container.ContainerCentrifuge;
 import hellfirepvp.frozencore.common.registry.RegistryBlocks;
 import hellfirepvp.frozencore.common.registry.RegistryItems;
+import hellfirepvp.frozencore.common.registry.RegistryRecipes;
+import hellfirepvp.frozencore.common.tile.TileCentrifuge;
 import net.minecraft.block.Block;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.IGuiHandler;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 
 /**
  * This class is part of the FrozenCore Core/Tweaker-mod
@@ -12,7 +22,7 @@ import net.minecraft.item.Item;
  * Created by HellFirePvP
  * Date: 14.04.2017 / 16:40
  */
-public class CommonProxy {
+public class CommonProxy implements IGuiHandler {
 
     public void preInit() {
         RegistryItems.setupDefaults();
@@ -21,10 +31,12 @@ public class CommonProxy {
         RegistryItems.init();
 
         RegistryBlocks.initRenderRegistry();
+
+        RegistryRecipes.init();
     }
 
     public void init() {
-
+        NetworkRegistry.INSTANCE.registerGuiHandler(FrozenCore.instance, this);
     }
 
     public void postInit() {
@@ -42,4 +54,21 @@ public class CommonProxy {
 
     public void registerFromSubItems(Item item, String name) {}
 
+    @Override
+    public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
+        switch (ID) {
+            case 0:
+                TileEntity te = world.getTileEntity(new BlockPos(x, y, z));
+                if(te != null && te instanceof TileCentrifuge) {
+                    return new ContainerCentrifuge(player.inventory, (TileCentrifuge) te);
+                }
+                break;
+        }
+        return null;
+    }
+
+    @Override
+    public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
+        return null;
+    }
 }
