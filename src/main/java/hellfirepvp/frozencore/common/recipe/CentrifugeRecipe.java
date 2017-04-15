@@ -138,6 +138,11 @@ public class CentrifugeRecipe {
         return out;
     }
 
+    public float getOutputChance(int outIndex) {
+        if(outIndex < 0 || outIndex >= outputs.size()) return 0F;
+        return outputs.get(outIndex).chance;
+    }
+
     public static class CentrifugeOutput {
 
         public final float chance;

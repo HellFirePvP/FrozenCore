@@ -22,6 +22,10 @@ public class CentrifugeRecipeRegistry {
         return recipe;
     }
 
+    public static List<CentrifugeRecipe> getRecipeList() {
+        return recipeList;
+    }
+
     @Nullable
     public static CentrifugeRecipe findMatchingRecipe(TileCentrifuge centrifuge) {
         for (CentrifugeRecipe recipe : recipeList) {
